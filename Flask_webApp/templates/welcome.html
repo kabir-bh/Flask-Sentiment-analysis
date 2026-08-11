@@ -8,7 +8,7 @@ By typing in a review text and clicking "submit", this app will determine if the
 <br>
 <br>
 
-<form action="/" method="post">
+<form id="review-form" action="/" method="post">
 &nbsp;&nbsp;Here, you can type in a review text:
 <br>
 <br>
@@ -16,5 +16,20 @@ By typing in a review text and clicking "submit", this app will determine if the
 <br />
     {{form.go}}<br />
 </form>
+
+<div id="submit-loader">
+  Submitting review... <span class="spinner"></span>
+</div>
+
+{% block afterscript %}
+<script>
+$(function() {
+    $('#review-form').on('submit', function() {
+        $('#submit-loader').show();
+        $(this).find(':submit').prop('disabled', true);
+    });
+});
+</script>
+{% endblock %}
 
 {% endblock %}
