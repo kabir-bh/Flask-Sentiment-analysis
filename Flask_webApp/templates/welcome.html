@@ -21,15 +21,24 @@ By typing in a review text and clicking "submit", this app will determine if the
   Submitting review... <span class="spinner"></span>
 </div>
 
+{% endblock %}
+
 {% block afterscript %}
 <script>
-$(function() {
-    $('#review-form').on('submit', function() {
-        $('#submit-loader').show();
-        $(this).find(':submit').prop('disabled', true);
+window.addEventListener('DOMContentLoaded', function() {
+    var form = document.getElementById('review-form');
+    var loader = document.getElementById('submit-loader');
+    if (!form || !loader) {
+        return;
+    }
+
+    form.addEventListener('submit', function() {
+        loader.style.display = 'block';
+        var submitButtons = form.querySelectorAll('button, input[type="submit"]');
+        submitButtons.forEach(function(button) {
+            button.disabled = true;
+        });
     });
 });
 </script>
-{% endblock %}
-
 {% endblock %}
