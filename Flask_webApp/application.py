@@ -189,7 +189,7 @@ def submit():
 
 @app.route('/about')
 def about():
-    return redirect("https://github.com/kabir-bh/Sentiment-analysis-Flask", code=302)
+    return redirect("https://github.com/kabir-bh/Flask-Sentiment-analysis", code=302)
 
 @app.route('/author')
 def author():
