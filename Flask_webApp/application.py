@@ -4,6 +4,7 @@ from flask import Flask, render_template, redirect
 from flask_wtf import FlaskForm
 from wtforms import Form, SubmitField, TextAreaField
 import os
+import re
 import string
 import html
 import webbrowser
@@ -11,12 +12,45 @@ import nltk
 from nltk.corpus import stopwords as sw
 import pickle
 import numpy as np
+from sklearn.feature_extraction.text import ENGLISH_STOP_WORDS
 
 try:
     import sklearn.svm.classes
 except ModuleNotFoundError:
     import sklearn.svm._classes as _old_svm_classes
     sys.modules['sklearn.svm.classes'] = _old_svm_classes
+
+
+def _ensure_nltk_data():
+    resources = {
+        'corpora/stopwords': 'stopwords',
+        'tokenizers/punkt': 'punkt',
+        'corpora/wordnet': 'wordnet',
+        'corpora/omw-1.4': 'omw-1.4',
+    }
+
+    for path, package in resources.items():
+        try:
+            nltk.data.find(path)
+        except LookupError:
+            nltk.download(package, quiet=True)
+
+
+def _get_stopwords():
+    try:
+        return sw.words('english')
+    except LookupError:
+        return list(ENGLISH_STOP_WORDS)
+
+
+def _tokenize_text(text):
+    try:
+        return nltk.word_tokenize(text)
+    except LookupError:
+        return re.findall(r"\b[a-zA-Z]+\b", text)
+
+
+_ensure_nltk_data()
 
 
 def _fix_old_tfidf_vectorizer(vec):
@@ -63,7 +97,7 @@ class BaseModel:
 
     # Preprocessing
     def preprocessing(self, line: str) -> str:
-        stopwords = sw.words('english')
+        stopwords = _get_stopwords()
         stopwords = stopwords + ['not_' + w for w in stopwords]
         pad_punct = str.maketrans({key: " {0} ".format(key) for key in string.punctuation})
         invalidChars = str(string.punctuation.replace("_", ""))
@@ -72,7 +106,7 @@ class BaseModel:
         line = str(line).replace("can't", "can not")
         line = str(line).replace("n't", " not")
         line = str(line).translate(pad_punct)
-        line = nltk.word_tokenize(line.lower())
+        line = _tokenize_text(line.lower())
 
         tokens = []
         negated = False
